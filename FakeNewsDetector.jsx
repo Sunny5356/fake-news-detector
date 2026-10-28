@@ -1,0 +1,402 @@
+import React, { useState } from 'react';
+import { 
+  ShieldAlert, 
+  ShieldCheck, 
+  Sparkles, 
+  AlertTriangle, 
+  Activity, 
+  Flame, 
+  CheckCircle2, 
+  Copy, 
+  RotateCcw, 
+  Terminal,
+  Zap,
+  HelpCircle,
+  ExternalLink
+} from 'lucide-react';
+
+export default function FakeNewsDetector() {
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Sample quick-test buttons for testing
+  const samplePrompts = [
+    {
+      label: "Sensational Conspiracy",
+      type: "fake",
+      text: "SHOCKING BOMBSHELL: Government secretly signed an extraterrestrial treaty to deploy synthetic clones in city councils across the nation! Doctors are outraged and warning citizens not to drink the treated tap water!"
+    },
+    {
+      label: "Scientific Report",
+      type: "real",
+      text: "The National Aeronautics and Space Administration (NASA) confirmed that the James Webb Space Telescope has captured deep atmospheric spectra of an exoplanet 120 light-years away, detecting signs of methane and carbon dioxide consistent with theoretical models."
+    }
+  ];
+
+  const handleAnalyze = async (e) => {
+    if (e) e.preventDefault();
+    if (!inputText.trim() || inputText.length < 15) {
+      setError("Please input at least 15 characters to perform reliable semantic analysis.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: inputText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+      setError(
+        "Could not connect to FastAPI backend at http://localhost:8000. Ensure 'main.py' is running with uvicorn."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isFake = result?.prediction === "FAKE";
+  const isReal = result?.prediction === "REAL";
+
+  return (
+    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col items-center justify-start p-4 sm:p-8 font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-hidden">
+      {/* Background Cosmic Glow Gradients */}
+      <div className="absolute top-[-15%] left-[20%] w-[550px] h-[550px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-[25%] right-[15%] w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] bg-purple-900/10 rounded-full blur-[160px] pointer-events-none" />
+
+      {/* Header Container */}
+      <header className="w-full max-w-4xl text-center mb-10 z-10 pt-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-xs font-medium tracking-wide shadow-[0_0_15px_rgba(99,102,241,0.2)] mb-4">
+          <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <span>Antigravity NLP Intelligence &bull; Passive-Aggressive ML</span>
+        </div>
+        
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+          Fake News Credibility Engine
+        </h1>
+        <p className="mt-3 text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+          Deep-space content verification powered by TF-IDF vectorization, decision-boundary margins, and behavioral sensationalism heuristics.
+        </p>
+      </header>
+
+      {/* Main Glassmorphic Layout */}
+      <main className="w-full max-w-4xl space-y-8 z-10">
+        
+        {/* Input Card */}
+        <div className="relative group rounded-2xl p-[1px] bg-gradient-to-b from-indigo-500/20 via-cyan-500/10 to-transparent shadow-[0_15px_40px_rgba(0,0,0,0.6)]">
+          <div className="relative rounded-2xl bg-[#0d121f]/85 backdrop-blur-xl p-6 sm:p-8 border border-white/[0.08]">
+            <div className="flex items-center justify-between mb-4">
+              <label htmlFor="article-input" className="text-sm font-semibold tracking-wide text-slate-200 flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-cyan-400" />
+                Paste Article or Headline Text
+              </label>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setInputText(''); setResult(null); setError(null); }}
+                  className="text-xs text-slate-400 hover:text-white transition flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10"
+                  title="Clear input"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {/* Textarea */}
+            <div className="relative">
+              <textarea
+                id="article-input"
+                rows={5}
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="Paste unverified headline, news excerpt, or social media post here..."
+                className="w-full rounded-xl bg-[#090d17]/80 border border-white/10 px-4 py-3.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none shadow-inner"
+              />
+              <div className="absolute right-3 bottom-3 text-[11px] text-slate-500 font-mono">
+                {inputText.length} chars
+              </div>
+            </div>
+
+            {/* Sample presets */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-slate-400 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                Try preset:
+              </span>
+              {samplePrompts.map((preset, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setInputText(preset.text)}
+                  className="text-xs px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.09] text-indigo-300 border border-indigo-500/20 hover:border-indigo-400/50 transition-all cursor-pointer"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Error banner */}
+            {error && (
+              <div className="mt-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2 animate-shake">
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Action Button */}
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                disabled={isLoading || !inputText.trim()}
+                onClick={handleAnalyze}
+                className="relative inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-400 hover:via-indigo-500 hover:to-cyan-400 shadow-[0_0_25px_rgba(99,102,241,0.35)] hover:shadow-[0_0_35px_rgba(34,211,238,0.5)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Analyzing Credibility...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-cyan-200 group-hover:rotate-12 transition-transform" />
+                    <span>Analyze Credibility</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Dashboard */}
+        {result && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+            
+            {/* Verdict Hero Card */}
+            <div className={`relative rounded-2xl p-[1px] ${
+              isFake 
+                ? 'bg-gradient-to-r from-rose-500/50 via-amber-500/30 to-rose-600/20 shadow-[0_0_40px_rgba(244,63,94,0.2)]' 
+                : 'bg-gradient-to-r from-emerald-500/50 via-cyan-500/30 to-emerald-600/20 shadow-[0_0_40px_rgba(16,185,129,0.2)]'
+            }`}>
+              <div className="rounded-2xl bg-[#0b101c]/90 backdrop-blur-xl p-6 sm:p-8 border border-white/[0.08]">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  
+                  {/* Left: Verdict Badge */}
+                  <div className="flex items-center gap-5">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 border ${
+                      isFake 
+                        ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.3)]' 
+                        : 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
+                    }`}>
+                      {isFake ? <ShieldAlert className="w-8 h-8" /> : <ShieldCheck className="w-8 h-8" />}
+                    </div>
+
+                    <div>
+                      <span className="text-xs uppercase font-mono tracking-widest text-slate-400">Classification Verdict</span>
+                      <div className="flex items-center gap-3 mt-1">
+                        <h2 className={`text-2xl sm:text-3xl font-black tracking-tight ${
+                          isFake ? 'text-rose-400' : 'text-emerald-400'
+                        }`}>
+                          {isFake ? "Likely Fake / Disinformation" : "Verified Credible / True"}
+                        </h2>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {isFake 
+                          ? "Content triggers high sensationalism markers and linguistic anomalies."
+                          : "Content matches journalistic syntax and verified information patterns."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Circular / Radial Gauge */}
+                  <div className="flex items-center gap-4 bg-white/[0.03] px-6 py-4 rounded-xl border border-white/[0.06]">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      {/* SVG Gauge */}
+                      <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                        <path
+                          className="text-white/10"
+                          strokeWidth="3.5"
+                          stroke="currentColor"
+                          fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                        <path
+                          className={isFake ? "text-rose-500" : "text-emerald-400"}
+                          strokeDasharray={`${result.confidence_score}, 100`}
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          stroke="currentColor"
+                          fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                      </svg>
+                      <span className="absolute font-mono font-bold text-xs text-slate-100">
+                        {Math.round(result.confidence_score)}%
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-mono uppercase text-slate-400">Confidence Score</div>
+                      <div className="text-lg font-bold text-white">
+                        {result.confidence_score}%
+                      </div>
+                      <div className="text-[10px] text-cyan-400 font-mono">Calibrated Margin</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Bar Meter */}
+                <div className="mt-6">
+                  <div className="flex justify-between text-xs font-mono text-slate-400 mb-2">
+                    <span>Hyperplane Separation Certainty</span>
+                    <span className="text-cyan-300">{result.confidence_score}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-white/5">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-1000 ${
+                        isFake 
+                          ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.8)]' 
+                          : 'bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]'
+                      }`}
+                      style={{ width: `${result.confidence_score}%` }}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Diagnostic Metrics & Risk Factors Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Sensationalism Card */}
+              <div className="rounded-xl bg-[#0c101a]/80 backdrop-blur-md p-5 border border-white/[0.08]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-amber-400" />
+                    Sensationalism Index
+                  </span>
+                  <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
+                    result.suspicious_sentiment.sensationalism_score > 40 ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'
+                  }`}>
+                    {result.suspicious_sentiment.sensationalism_score}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div 
+                    className="bg-amber-400 h-full rounded-full" 
+                    style={{ width: `${result.suspicious_sentiment.sensationalism_score}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Detects hyperbolic, clickbait framing & exaggerated claims.
+                </p>
+              </div>
+
+              {/* Emotional Charge Card */}
+              <div className="rounded-xl bg-[#0c101a]/80 backdrop-blur-md p-5 border border-white/[0.08]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                    Emotional Intensity
+                  </span>
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
+                    {result.suspicious_sentiment.emotional_charge}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div 
+                    className="bg-indigo-400 h-full rounded-full" 
+                    style={{ width: `${result.suspicious_sentiment.emotional_charge}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Measures outrage induction, fear markers, and subjectivity.
+                </p>
+              </div>
+
+              {/* Typographic Anomalies Card */}
+              <div className="rounded-xl bg-[#0c101a]/80 backdrop-blur-md p-5 border border-white/[0.08]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-cyan-400" />
+                    Risk Level
+                  </span>
+                  <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
+                    result.suspicious_sentiment.risk_level === 'High' 
+                      ? 'bg-rose-500/20 text-rose-300' 
+                      : result.suspicious_sentiment.risk_level === 'Moderate'
+                      ? 'bg-amber-500/20 text-amber-300'
+                      : 'bg-emerald-500/20 text-emerald-300'
+                  }`}>
+                    {result.suspicious_sentiment.risk_level}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-300 mt-2 space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">All-Caps Density:</span>
+                    <span className="font-mono">{result.suspicious_sentiment.all_caps_ratio}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Punctuation Spikes:</span>
+                    <span className="font-mono">{result.suspicious_sentiment.exclamation_count} (!/?)</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Flagged Key Takeaways / Lexical Triggers */}
+            <div className="rounded-xl bg-[#0c101a]/80 backdrop-blur-md p-5 border border-white/[0.08]">
+              <h3 className="text-xs uppercase font-mono tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                Detected Linguistic Signals & Trigger Keywords
+              </h3>
+              
+              {result.suspicious_sentiment.flagged_keywords.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {result.suspicious_sentiment.flagged_keywords.map((word, i) => (
+                    <span 
+                      key={i} 
+                      className="px-2.5 py-1 rounded-md text-xs font-mono bg-rose-500/10 border border-rose-500/30 text-rose-300"
+                    >
+                      &bull; {word}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">
+                  No explicit sensational buzzwords or inflammatory keywords detected in input.
+                </p>
+              )}
+            </div>
+
+          </div>
+        )}
+
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-12 text-center text-xs text-slate-500 font-mono z-10">
+        Engineered with FastAPI &bull; scikit-learn &bull; React & Tailwind &bull; Antigravity Style
+      </footer>
+    </div>
+  );
+}
