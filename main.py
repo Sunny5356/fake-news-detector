@@ -12,6 +12,8 @@ from contextlib import asynccontextmanager
 from typing import Dict, Any, List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 # --- Model & Vectorizer storage ---
@@ -120,7 +122,7 @@ async def lifespan(app: FastAPI):
         try:
             ml_resources["model"] = joblib.load(MODEL_PATH)
             ml_resources["vectorizer"] = joblib.load(VECTORIZER_PATH)
-            print("[✓] Model and vectorizer loaded into memory successfully.")
+            print("[OK] Model and vectorizer loaded into memory successfully.")
         except Exception as e:
             print(f"[!] Error loading existing models: {e}")
     else:
@@ -132,7 +134,7 @@ async def lifespan(app: FastAPI):
         save_artifacts(model, vectorizer, MODEL_PATH, VECTORIZER_PATH)
         ml_resources["model"] = model
         ml_resources["vectorizer"] = vectorizer
-        print("[✓] Baseline model trained and ready.")
+        print("[OK] Baseline model trained and ready.")
 
     yield
     print("[*] Shutting down Fake News Detection Service...")
@@ -177,6 +179,14 @@ class PredictResponse(BaseModel):
     suspicious_sentiment: SuspiciousSentimentBreakdown
 
 @app.get("/")
+def serve_index():
+    """Serves the interactive Antigravity React UI dashboard."""
+    static_file = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(static_file):
+        return FileResponse(static_file)
+    return {"message": "Fake News Detector API Online. Visit /docs for Swagger UI."}
+
+@app.get("/health")
 def health_check():
     """Health status and model readiness check."""
     ready = ml_resources["model"] is not None and ml_resources["vectorizer"] is not None
